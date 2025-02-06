@@ -1,18 +1,26 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const connectDB = require("./config/db");
+// server.js
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const authRoutes = require('./routes/authRoutes');   // Auth routes
+const postRoutes = require('./routes/postRoutes');   // Post routes
 
-dotenv.config();
-connectDB();
-
+dotenv.config(); // Load environment variables from .env
 
 const app = express();
-app.use(express.json());
-app.use(cors());
+app.use(express.json()); // For parsing JSON bodies
+app.use(cors()); // Enable CORS for your app
 
-app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/posts", require("./routes/postRoutes"));
+// Database connection (ensure MongoDB is running)
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Use the routes
+app.use('/api/auth', authRoutes); // Auth routes
+app.use('/api/posts', postRoutes); // Post routes
+
+const port = process.env.PORT || 5000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
